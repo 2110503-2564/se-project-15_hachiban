@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { 
@@ -16,7 +16,9 @@ import {
   MenuItem
 } from "@mui/material";
 import { toast, Toaster } from "react-hot-toast";
-import createCompany from "@/libs/createCompany";
+import getCompany from "@/libs/getCompany";
+import updateCompany from "@/libs/updateCompany";
+import { CompanyItem } from "../../../../../interface";
 
 // Company size options based on your schema
 const companySizeOptions = [
@@ -28,23 +30,13 @@ const companySizeOptions = [
   '1000+ employees'
 ];
 
-export default function CreateCompany() {
+export default function EditCompany({ params }: { params: { cid: string } }) {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [creating, setCreating] = useState(false);
-  const [company, setCompany] = useState<{
-    name: string;
-    address: string;
-    website: string;
-    description: string;
-    tel: string;
-    tags: string[];
-    logo: string;
-    about: string;
-    companySize: string;
-    overview: string;
-    foundedYear: string;
-  }>({
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [company, setCompany] = useState<CompanyItem>({
+    _id: "",
     name: "",
     address: "",
     website: "",
@@ -56,13 +48,38 @@ export default function CreateCompany() {
     companySize: "",
     overview: "",
     foundedYear: "",
+    __v: 0,
+    value: ""
   });
 
+  // Fetch company data
+  useEffect(() => {
+    const fetchCompany = async () => {
+      if (status === "authenticated") {
+        try {
+          setLoading(true);
+          const data = await getCompany(params.cid);
+          setCompany(data.data);
+        } catch (error) {
+          console.error("Error fetching company:", error);
+          toast.error("Failed to load company data");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    if (params.cid) {
+      fetchCompany();
+    }
+  }, [params.cid, status]);
+
   // Redirect if not authenticated
-  if (status === "unauthenticated") {
-    router.push("/login");
-    return null;
-  }
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -92,19 +109,19 @@ export default function CreateCompany() {
     }
     
     try {
-      setCreating(true);
-      await createCompany(company);
-      toast.success("Company created successfully");
+      setUpdating(true);
+      await updateCompany(company);
+      toast.success("Company updated successfully");
       router.push("/company");
     } catch (error) {
-      console.error("Error creating company:", error);
-      toast.error("Failed to create company");
+      console.error("Error updating company:", error);
+      toast.error("Failed to update company");
     } finally {
-      setCreating(false);
+      setUpdating(false);
     }
   };
 
-  if (status === "loading") {
+  if (loading) {
     return (
       <Container maxWidth="sm" sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "80vh" }}>
         <CircularProgress />
@@ -117,7 +134,7 @@ export default function CreateCompany() {
       <Container maxWidth="sm">
         <Toaster position="top-center" />
         <Typography variant="h4" component="h1" align="center" gutterBottom color="text.primary">
-          Create New Company
+          Edit Company
         </Typography>
         
         <Paper elevation={3} sx={{ p: 4, borderRadius: 2, bgcolor: "white" }}>
@@ -167,19 +184,6 @@ export default function CreateCompany() {
               onChange={handleChange}
               variant="outlined"
             />
-{/*             
-            <TextField
-              margin="normal"
-              fullWidth
-              id="description"
-              label="Description"
-              name="description"
-              value={company.description}
-              onChange={handleChange}
-              variant="outlined"
-              multiline
-              rows={3}
-            /> */}
             
             <TextField
               margin="normal"
@@ -201,10 +205,9 @@ export default function CreateCompany() {
               value={company.tags.join(", ")}
               onChange={handleChange}
               variant="outlined"
-              helperText="Enter industry tags separated by commas"
             />
             
-            {/* Dropdown selector for companySize */}
+            {/* Replace TextField with Select for companySize */}
             <FormControl fullWidth margin="normal">
               <InputLabel id="company-size-label">Company Size</InputLabel>
               <Select
@@ -238,12 +241,11 @@ export default function CreateCompany() {
               margin="normal"
               fullWidth
               id="logo"
-              label="Company Logo URL"
+              label="Company Logo"
               name="logo"
               value={company.logo}
               onChange={handleChange}
               variant="outlined"
-              helperText="Enter a URL to the company logo image"
             />
             
             <TextField
@@ -258,26 +260,26 @@ export default function CreateCompany() {
               rows={6}
               variant="outlined"
             />
-            
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                disabled={creating}
-                sx={{ 
-                  py: 1.5, 
-                  px: 4, 
-                  borderRadius: 2,
-                  fontSize: '1rem'
-                }}
-              >
-                {creating ? <CircularProgress size={24} color="inherit" /> : "Create Company"}
-              </Button>
-            </Box>
+            <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={updating}
+            sx={{ 
+                py: 1.5, 
+                px: 4, 
+                borderRadius: 2,
+                fontSize: '1rem'
+            }}
+            >
+            {updating ? <CircularProgress size={24} color="inherit" /> : "Update Company"}
+            </Button>
+        </Box>
           </Box>
         </Paper>
       </Container>
+        
     </Box>
   );
 }
