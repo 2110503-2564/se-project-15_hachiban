@@ -8,7 +8,7 @@ export default async function deletePosition(pid: string) {
   }
 
   const response = await fetch(
-    `${process.env.BACKEND_URL}/api/v1/positions/${pid}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/positions/${pid}`,
     {
       method: "DELETE",
       headers: {
@@ -18,10 +18,13 @@ export default async function deletePosition(pid: string) {
     }
   );
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    throw new Error(`Failed to delete the position: ${response.status} ${errorData ? JSON.stringify(errorData) : response.statusText}`);
-  }
+  const data = await response.json();
 
-  return response.json();
+    if (!response.ok) {
+      console.log(data.message)
+        const errorMessage = data.message || "Failed to delete position";
+        throw new Error(errorMessage);
+      }
+
+  return data;
 }

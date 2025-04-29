@@ -82,6 +82,7 @@ export default function AddPositionPage() {
         [name]: value,
       }));
     }
+
     // setFormData(prevState => ({
     //   ...prevState,
     //   [name]: value
@@ -144,14 +145,29 @@ export default function AddPositionPage() {
   const handleSubmit = async (e:any) => {
     e.preventDefault();
     
-    // Validation
+    
     if (!formData.title) {
-      toast.error("Please enter a position title");
+      toast.error("Position title is required");
       return;
     }
-    
     if (!formData.company) {
-      toast.error("Please select a company");
+      toast.error("Position company is required");
+      return;
+    }
+    if (!formData.workArrangement) {
+      toast.error("Position work arrangement is required");
+      return;
+    }
+    if (!formData.location) {
+      toast.error("Position location is required");
+      return;
+    }
+    if (!formData.interviewStart) {
+      toast.error("Interview start date is required");
+      return;
+    }
+    if (!formData.interviewEnd) {
+      toast.error("Interview end date is required");
       return;
     }
     
@@ -240,6 +256,7 @@ export default function AddPositionPage() {
               onChange={handleNumberChange}
               min="1"
               className="w-full p-2 bg-gray-100 rounded border-0 text-black"
+              required
             />
           </div>
           
@@ -364,22 +381,22 @@ export default function AddPositionPage() {
               <div>
               <label className="block font-medium text-black">Skills</label>
               <TextField
-  label="Skills (comma separated)"
-  fullWidth
-  value={skillsInput}
-  onChange={(e) => setSkillsInput(e.target.value)}
-  onBlur={() => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: skillsInput
-        .split(',')
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0),
-    }));
-  }}
-  variant="outlined"
-  helperText="Separate skills with commas"
-/>
+                label="Skills (comma separated)"
+                fullWidth
+                value={skillsInput}
+                onChange={(e) => setSkillsInput(e.target.value)}
+                onBlur={() => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    skills: skillsInput
+                      .split(',')
+                      .map((s) => s.trim())
+                      .filter((s) => s.length > 0),
+                  }));
+                }}
+                variant="outlined"
+                helperText="Separate skills with commas"
+              />
 
           </div>
 
@@ -444,6 +461,7 @@ export default function AddPositionPage() {
           <div>
             <label htmlFor="location" className="block font-medium mb-1 text-black">Location</label>
             <input
+            required
               type="text"
               id="location"
               name="location"
@@ -460,6 +478,7 @@ export default function AddPositionPage() {
                 type="date"
                 id="interviewStart"
                 name="interviewStart"
+                required
                 value={formData.interviewStart}
                 onChange={handleChange}
                 className="p-2 bg-white border border-gray-300 rounded text-black"
@@ -469,6 +488,7 @@ export default function AddPositionPage() {
                 type="date"
                 id="interviewEnd"
                 name="interviewEnd"
+                required
                 value={formData.interviewEnd}
                 onChange={handleChange}
                 className="p-2 bg-white border border-gray-300 rounded text-black"

@@ -1,4 +1,4 @@
-import React, { use } from 'react';
+
 import { notFound } from 'next/navigation';
 import getPositionById from '@/libs/getPositionById';
 import { Button } from '@mui/material';
@@ -23,11 +23,12 @@ type PositionDetailPageProps = {
 
 export default async function PositionDetailPage({ params }: PositionDetailPageProps) {
   const { pid } = params;
+
+  
+  try {
     const session = await getServerSession(authOptions);
     const isAdmin = session?.user?.role === 'admin';
   
-  
-  try {
     const positionResponse:OnePositionJson = await getPositionById(pid);
     const position:PositionItem = positionResponse.data;
     
@@ -64,6 +65,41 @@ export default async function PositionDetailPage({ params }: PositionDetailPageP
                 ))}
               </ul>
             </div>
+
+
+               <div className="mb-6">
+                  <h2 className="text-lg font-semibold text-gray-700 mb-2">
+                    Skills
+                  </h2>
+                  <div className="flex flex-wrap gap-2">
+                    {position.skill &&
+                      position.skill.map((skillone, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full"
+                        >
+                          {skillone}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+
+            {/* Salary Range */}
+              <div className="mb-10">
+                <h2 className="text-lg font-semibold text-gray-700 mb-2">
+                  Salary Range
+                </h2>
+                <div className="flex gap-2 text-sm font-medium text-green-800">
+                  <span className="bg-green-100 px-3 py-1 rounded-full">
+                    Min: {position.salary.min.toLocaleString()} ฿
+                  </span>
+                  <span className="bg-green-100 px-3 py-1 rounded-full">
+                    Max: {position.salary.max.toLocaleString()} ฿
+                  </span>
+                </div>
+              </div>
+
+
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-gray-50 p-4 rounded-lg">
