@@ -3,7 +3,7 @@ import { getSession } from "next-auth/react";
 export default async function deleteCompany(cid:string) {
     const session = await getSession();
     const response = await fetch(
-        `${process.env.BACKEND_URL}/api/v1/companies/${cid}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/companies/${cid}`,
         {
             method: "DELETE",
             headers: {
@@ -12,8 +12,15 @@ export default async function deleteCompany(cid:string) {
         }
     );
     
+
+  const data = await response.json();
+
     if (!response.ok) {
-        throw new Error("Failed to delete company");
+        
+        const errorMessage = data.message || "Failed to delete company";
+        throw new Error(errorMessage);
+
     }
-    return response.json();
+
+    return data;
 }
